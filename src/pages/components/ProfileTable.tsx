@@ -13,41 +13,54 @@ import {
   TableHead,
   TableBody,
   TableContainer,
+  CircularProgress, // Добавлено для вращающегося кружка
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import SearchIcon from "@mui/icons-material/Search";
 import { getProfileStates } from "../../services/cftoolsAPI";
 import { ProfileState } from "../../models/models";
 import { useAsyncError } from "react-router-dom";
 
-const InputLine = (props : {
-    onChange : (identifier : string) => void
-}) => {
-    const [identifier, setIdentifier] = useState<string>('');
+const InputLine = (props: { onChange: (identifier: string) => void }) => {
+  const [inputValue, setInputValue] = useState('');
+
+  const handleSearch = () => {
+    props.onChange(inputValue);
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleSearch();
+  };
+
   return (
-    <Paper
-      component="form"
-      sx={{ p: "2px 4px", display: "flex", alignItems: "center" }}
-    >
-      <InputBase
-        sx={{ ml: 1, flex: 1 }}
-        placeholder="nickname, steamID64, battleyeID"
-        inputProps={{ "aria-label": "search google maps" }}
-      />
-      <IconButton
-        type="button"
-        sx={{ p: "10px" }}
-        aria-label="search"
-      ></IconButton>
-    </Paper>
+    <Box mb={2} mt={2}>
+      <Paper
+        component="form"
+        sx={{ p: '2px 4px', display: 'flex', alignItems: 'center' }}
+        onSubmit={handleSubmit}
+      >
+        <IconButton type="submit" sx={{ p: '10px' }} aria-label="search">
+          <SearchIcon />
+        </IconButton>
+
+        <InputBase
+          onChange={(e) => setInputValue(e.target.value)}
+          sx={{ ml: 1, flex: 1 }}
+          placeholder="nickname, steamID64, battleyeID"
+        />
+      </Paper>
+    </Box>
   );
 };
 
+interface RowProps {
+  state: ProfileState;
+}
 
-
-const Row = (props:  ProfileState, identifier : string ) => {
-
+const Row = ({ state }: RowProps) => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -62,11 +75,10 @@ const Row = (props:  ProfileState, identifier : string ) => {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-
-        <TableCell align="right">{props.identifier}</TableCell>
-        <TableCell align="right">{props.displayName}</TableCell>
-        <TableCell align="right">{props.playState.online}</TableCell>
-        <TableCell align="right">{props.playState.server.name}</TableCell>
+        <TableCell align="center">{state.identifier}</TableCell>
+        <TableCell align="center">{state.displayName}</TableCell>
+        <TableCell align="center">{state.playState.online}</TableCell>
+        <TableCell align="center">{state.playState.server.name}</TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -78,26 +90,13 @@ const Row = (props:  ProfileState, identifier : string ) => {
               <Table size="small" aria-label="purchases">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Date</TableCell>
-                    <TableCell>Customer</TableCell>
-                    <TableCell align="right">Amount</TableCell>
-                    <TableCell align="right">Total price ($)</TableCell>
+                    <TableCell align="center">Date</TableCell>
+                    <TableCell align="center"> </TableCell>
+                    <TableCell align="center">Amount</TableCell>
+                    <TableCell align="center">Total price ($)</TableCell>
                   </TableRow>
                 </TableHead>
-                <TableBody>
-                  {historyData.map((historyRow) => (
-                    <TableRow key={historyRow.date}>
-                      <TableCell component="th" scope="row">
-                        {historyRow.date}
-                      </TableCell>
-                      <TableCell>{historyRow.customerId}</TableCell>
-                      <TableCell align="right">{historyRow.amount}</TableCell>
-                      <TableCell align="right">
-                        {Math.round(historyRow.amount * row.price * 100) / 100}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
+                <TableBody></TableBody>
               </Table>
             </Box>
           </Collapse>
@@ -107,52 +106,56 @@ const Row = (props:  ProfileState, identifier : string ) => {
   );
 };
 
-const rows = [
-  createData("global01", global, 6.0, 24, 4.0, 3.99),
-  createData("Ice cream sandwich", 237, 9.0, 37, 4.3, 4.99),
-  createData("Eclair", 262, 16.0, 24, 6.0, 3.79),
-  createData("Cupcake", 305, 3.7, 67, 4.3, 2.5),
-  createData("Gingerbread", 356, 16.0, 49, 3.9, 1.5),
-];
-
 const ProfileTable = () => {
-    const [identifier, setIdentifier] = useState('')
+  const [loading, setLoading] = useState(false); // Добавлено состояние загрузки
+  const [identifier, setIdentifier] = useState("");
+  const [states, setStates] = useState<ProfileState[]>([]);
+
   useEffect(() => {
-    // Replace the following with your actual data fetching logic
-    getProfileStates(row.id)
+    setLoading(true); // Устанавливаем состояние загрузки при начале запроса
+    getProfileStates(identifier)
       .then((data) => {
         console.log("Profile states:", data);
-        setHistoryData(data.history); // Assuming data has a 'history' property
+        setStates(data);
       })
       .catch((error) => {
         console.error("Error fetching profile states:", error);
+      })
+      .finally(() => {
+        setLoading(false); // Сбрасываем состояние загрузки после получения данных
       });
-  }, [row.id]);
-
+  }, [identifier]);
   return (
-    <Grid>
-      <InputLine onChange={identifier  => setValue(identifier)}></InputLine>
-
-      <Paper sx={{ display: "flex", alignItems: "center" }}>
-        <TableContainer component={Paper}>
-          <Table aria-label="collapsible table">
-            <TableHead>
-              <TableRow>
-                <TableCell />
-                <TableCell>identifier</TableCell>
-                <TableCell align="right">name</TableCell>
-                <TableCell align="right">online</TableCell>
-                <TableCell align="right">server</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows.map((row) => (
-                <Row key={row.name} row={row} />
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
+    <Grid container justifyContent="center" alignItems="center" spacing={2}>
+      <Grid item xs={12} md={12}>
+        <InputLine onChange={(identifier) => setIdentifier(identifier)} />
+        <Paper>
+          {loading ? (
+            <Box p={2} display="flex" alignItems="center" justifyContent="center">
+              <CircularProgress />
+            </Box>
+          ) : (
+            <TableContainer >
+              <Table aria-label="collapsible table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell />
+                    <TableCell align="center">identifier</TableCell>
+                    <TableCell align="center">name</TableCell>
+                    <TableCell align="center">online</TableCell>
+                    <TableCell align="center">server</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {states.map((state: ProfileState) => (
+                    <Row key={state.cftoolsId} state={state} />
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </Paper>
+      </Grid>
     </Grid>
   );
 };

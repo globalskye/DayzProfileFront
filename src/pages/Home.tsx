@@ -18,8 +18,7 @@ const Home = () => {
       >
         <Box
           sx={{
-            width: '40%',
-            
+            width: '60%',
             padding: '20px', // Padding on all sides
             boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.5)',
             backgroundColor: 'grey',

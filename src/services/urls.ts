@@ -1,3 +1,3 @@
-export const HOST_URL = process.env.HOST_URL;
+export const HOST_URL = process.env.PUBLIC_URL
 export const CFTOOLS_API_URL = HOST_URL + "cftools/"
-export const GET_PROFILES_STATES = HOST_URL + "states/"
+export const GET_PROFILES_STATES = "http://localhost:8080/cftools/" + "states/"

@@ -3,10 +3,10 @@ import { ProfileState } from "../models/models";
 import { authHeader } from "./auth";
 import { GET_PROFILES_STATES } from "./urls";
 
-export const getProfileStates = (id: string) => {
+export const getProfileStates = (identifier: string) => {
     return axios
-      .get(GET_PROFILES_STATES + id, { headers: authHeader() })
-      .then((response: { data: ProfileState }) => {
+      .get("http://localhost:8080/cftools/" + "states/"+ identifier, { headers: authHeader() })
+      .then((response: { data: ProfileState[] }) => {
         return response.data;
       })
       .catch((error: any) => {
