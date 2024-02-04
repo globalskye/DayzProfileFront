@@ -153,15 +153,8 @@ const Row = ({ state }: RowProps) => {
       </TableRow>
 
       <Collapse in={open} timeout="auto" unmountOnExit>
-      <Grid item xs={8}>
-          <Paper >
-          <Box sx={{ margin: 1, display: "flex", flexDirection: "column" }}>
+        <Box sx={{ margin: 1, flexDirection: "column" }}>
           {renderAvatar()}
-          </Box>
-          </Paper>
-        </Grid>
-        <Box sx={{ margin: 1, display: "flex", flexDirection: "column" }}>
-         
           {renderNicknames()}
 
           <Typography variant="h6" gutterBottom component="div">
