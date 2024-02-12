@@ -10,6 +10,10 @@ import {
   Collapse,
   Typography,
   Table,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
   TableHead,
   TableBody,
   TableContainer,
@@ -19,7 +23,8 @@ import {
   ListItemText,
   ListItem,
   Avatar,
-  Link, // Добавлено для вращающегося кружка
+  Link,
+  Dialog, // Добавлено для вращающегося кружка
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -31,6 +36,7 @@ import {
 } from "../../services/cftoolsAPI";
 import { Ban, ProfileInformation, ProfileState } from "../../models/models";
 import { useAsyncError } from "react-router-dom";
+import { Modal } from "react-bootstrap";
 
 const InputLine = (props: { onChange: (identifier: string) => void }) => {
   const [inputValue, setInputValue] = useState("");
@@ -68,7 +74,6 @@ const InputLine = (props: { onChange: (identifier: string) => void }) => {
 interface RowProps {
   state: ProfileState;
 }
-
 const Row = ({ state }: RowProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -95,29 +100,30 @@ const Row = ({ state }: RowProps) => {
     }
   }, [open, id]);
 
+  const handleOpenDialog = () => {
+    setOpen(true);
+    setID(state.cftoolsId);
+  };
+
+  const handleCloseDialog = () => {
+    setOpen(false);
+  };
+
   const renderAvatar = () => {
     const avatarUrl = profileInformation?.steam?.profile?.avatarfull;
-    const personaname = profileInformation?.steam?.profile?.personaname;
-    const steamProfileUrl = `https://steamcommunity.com/profiles/${profileInformation?.steam?.steam64}`;
 
     return (
-      <Grid item xs={3}>
-        <Avatar
-          alt="Steam Avatar"
-          src={avatarUrl}
-          sx={{ width: 200, height: 200, borderRadius: 1, marginLeft: 2 }}
-        />
-      </Grid>
+      <Avatar
+        alt="Steam Avatar"
+        src={avatarUrl}
+        sx={{ width: 200, height: 200, borderRadius: 1, marginLeft: 2 }}
+      />
     );
   };
 
   const renderNicknames = () => {
     const nicknames = profileInformation?.overview?.omega?.aliases || [];
-    return (
-      <Typography variant="body1" gutterBottom component="div">
-        {nicknames.join(" | ")}
-      </Typography>
-    );
+    return <Typography>{nicknames.join(" | ")}</Typography>;
   };
 
   return (
@@ -127,10 +133,7 @@ const Row = ({ state }: RowProps) => {
           <IconButton
             aria-label="expand row"
             size="small"
-            onClick={() => {
-              setOpen(!open);
-              setID(state.cftoolsId);
-            }}
+            onClick={handleOpenDialog}
           >
             {loading ? (
               <CircularProgress size={20} />
@@ -140,26 +143,16 @@ const Row = ({ state }: RowProps) => {
           </IconButton>
         </TableCell>
         <TableCell align="center">{state.identifier}</TableCell>
-        <TableCell align="center">
-          <Link
-            href={`https://steamcommunity.com/profiles/${profileInformation?.steam?.steam64}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {state.playState.online}
-          </Link>
-        </TableCell>
         <TableCell align="center">{state.playState.server.name}</TableCell>
       </TableRow>
 
-      <Collapse in={open} timeout="auto" unmountOnExit>
-        <Box sx={{ margin: 1, flexDirection: "column" }}>
-          {renderAvatar()}
-          {renderNicknames()}
-
-          <Typography variant="h6" gutterBottom component="div">
-            DAYZ
-          </Typography>
+      <Dialog
+        open={open}
+        onClose={handleCloseDialog}
+        aria-labelledby="profile-dialog-title"
+      >
+        <DialogTitle id="profile-dialog-title">Profile Information</DialogTitle>
+        <DialogContent>
           <List>
             {profileInformation?.overview?.omega?.aliases.map(
               (nickname: string, index: number) => (
@@ -168,30 +161,7 @@ const Row = ({ state }: RowProps) => {
                 </ListItem>
               )
             )}
-            <ListItem>
-              <ListItemText
-                primary={`Created At: ${profileInformation?.overview?.omega?.created_at}`}
-              />
-            </ListItem>
           </List>
-
-          <Typography variant="h6" gutterBottom component="div">
-            Steam
-          </Typography>
-          <List>
-            <ListItem>
-              <ListItemText
-                primary={`Steam ID: ${profileInformation?.steam?.steam64}`}
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemText
-                primary={`Profile URL: https://steamcommunity.com/profiles/${profileInformation?.steam?.steam64}`}
-              />
-            </ListItem>
-            {/* Добавьте другие поля Steam, которые вы хотите отобразить */}
-          </List>
-
           <Typography variant="h6" gutterBottom component="div">
             Bans
           </Typography>
@@ -219,8 +189,11 @@ const Row = ({ state }: RowProps) => {
           ) : (
             <Typography>No Bans</Typography>
           )}
-        </Box>
-      </Collapse>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </React.Fragment>
   );
 };
@@ -261,8 +234,10 @@ const ProfileTable = () => {
 
   return (
     <Grid container justifyContent="center" alignItems="center" spacing={2}>
-      <Grid item xs={12} md={12}>
+      <Grid item xs={12}>
+        <Grid />
         <InputLine onChange={(identifier) => setIdentifier(identifier)} />
+
         <Paper>
           {loading ? (
             <Box
@@ -294,6 +269,7 @@ const ProfileTable = () => {
                       </TableCell>
                     </TableRow>
                   </TableHead>
+
                   <TableBody>
                     {states
                       .slice(
