@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Box from "@mui/material/Box";
 import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
@@ -6,93 +6,37 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import GroupIcon from '@mui/icons-material/Group';
-import { Collapse } from '@mui/material';
+import { getGroups,createGroup } from '../../services/cftoolsAPI';
+import {Group} from '../../models/models';
+import {Button, CircularProgress, Collapse, TextField} from '@mui/material';
 
-export default function SidebarPage() {
-    const [secretKey, setSecretKey] = useState<string>('');
+const SidebarPage = () => {
 
-    const handleKeyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSecretKey(event.target.value);
-        localStorage.setItem('Authorization', event.target.value);
-    };
-
-    const handleClearKey = () => {
-        setSecretKey('');
-        localStorage.removeItem('Authorization');
-    };
 
     return (
         <Box
             sx={{
-                width: 250,
+                width: 300,
                 height: '100vh',
                 borderRight: '1px solid rgba(0, 0, 0, 0.12)',
                 position: 'fixed',
                 top: 0,
                 left: 0,
-                backgroundColor: '#fff',
+                backgroundColor: '#f9f9f9',
                 zIndex: 1000,
                 padding: '16px'
             }}
         >
-            <List>
-
-                    <ListItem key={"SearchProfiles"} disablePadding>
-                        <ListItemButton>
-                            <ListItemIcon>
-                                <PersonSearchIcon />
-                            </ListItemIcon>
-                            <ListItemText primary={"Search Profiles"} />
-                        </ListItemButton>
-                    </ListItem>
-
-            </List>
-            <Divider />
-            <List>
-                {['All mail', 'Trash', 'Spam'].map((text, index) => (
-                    <ListItem key={text} disablePadding>
-                        <ListItemButton>
-                            <ListItemIcon>
-                              <GroupIcon />
-                            </ListItemIcon>
-                            <ListItemText primary={text} />
-                        </ListItemButton>
-                    </ListItem>
-                ))}
-            </List>
-
-            <Divider />
+        <GroupItem />
             <ContactMe />
-            <Divider />
-            <Box mt={2}>
-                <TextField
-                    value={secretKey}
-                    onChange={handleKeyChange}
-                    label="API KEY"
-                    variant="outlined"
-                    fullWidth
-                    size="small"
-                />
-            </Box>
-            <Box mt={2}>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleClearKey}
-                    fullWidth
-                >
-                    Clear Key
-                </Button>
-            </Box>
         </Box>
     );
-}
+};
+
+
+
+export default SidebarPage;
 const ContactMe = () => {
     const [open, setOpen] = useState(false);
 
@@ -137,6 +81,106 @@ const ContactMe = () => {
                 </List>
             </Collapse>
         </List>
+    );
+};
+
+const GroupItem = () => {
+    const [loading, setLoading] = useState(true);
+    const [groups, setGroups] = useState<Group[]>([]);
+    const [newGroupName, setNewGroupName] = useState('');
+    const [open, setOpen] = useState(false);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await getGroups();
+                setGroups(data);
+            } catch (error) {
+                console.error('Error fetching groups:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    const handleNewGroup = async () => {
+        try {
+            setLoading(true);
+            const newGroup = await createGroup(newGroupName);
+            setGroups(prevGroups => [...prevGroups, newGroup]);
+            setNewGroupName('');
+        } catch (error) {
+            console.error('Error creating group:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const toggleOpen = () => {
+        setOpen(!open);
+    };
+
+    return (
+        <>
+            <ListItem disablePadding onClick={toggleOpen}>
+                <ListItemButton>
+                    <ListItemIcon>
+                        <GroupIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Groups" />
+                </ListItemButton>
+            </ListItem>
+            <Divider />
+            {open && (
+                <>
+                    {loading ? (
+                        <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+                            <CircularProgress />
+                        </Box>
+                    ) : (
+                        <>
+                            <List>
+                                {groups.map((group, index) => (
+                                    <ListItem key={group.id} disablePadding>
+                                        <ListItemButton>
+                                            <ListItemIcon>
+                                                <GroupIcon />
+                                            </ListItemIcon>
+                                            <ListItemText primary={group.groupName} />
+                                        </ListItemButton>
+                                    </ListItem>
+                                ))}
+                            </List>
+                            <Divider />
+                            <List>
+                                <ListItem disablePadding>
+                                    <TextField
+                                        value={newGroupName}
+                                        onChange={e => setNewGroupName(e.target.value)}
+                                        label="New Group Name"
+                                        variant="outlined"
+                                        fullWidth
+                                    />
+                                </ListItem>
+                                <ListItem disablePadding>
+                                    <Button
+                                        variant="outlined"
+
+                                        onClick={handleNewGroup}
+                                        fullWidth
+                                        sx={{ mt: 1 }}
+                                    >
+                                        Create New Group
+                                    </Button>
+                                </ListItem>
+                            </List>
+                        </>
+                    )}
+                </>
+            )}
+        </>
     );
 };
 

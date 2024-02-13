@@ -66,4 +66,13 @@ export interface ProfileState {
     banStatus: BanStatus;
     steam: Steam;
   }
-  
+export interface Member {
+  CFToolsID: string;
+  alias: string;
+}
+
+export interface Group {
+  id: number;
+  groupName: string;
+  members?: Member[];
+}
