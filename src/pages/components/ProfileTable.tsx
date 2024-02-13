@@ -1,209 +1,18 @@
-import {
-  Grid,
-  Paper,
-  Box,
-  IconButton,
-  InputBase,
-  Divider,
-  TableRow,
-  TableCell,
-  Collapse,
-  Typography,
-  Table,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TableHead,
-  TableBody,
-  TableContainer,
-  CircularProgress,
-  TablePagination,
-  List,
-  ListItemText,
-  ListItem,
-  Avatar,
-  Link,
-  Dialog, // Добавлено для вращающегося кружка
-} from "@mui/material";
-import React, { useEffect, useState } from "react";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import SearchIcon from "@mui/icons-material/Search";
-import {
-  getProfileInformation,
-  getProfileStates,
-} from "../../services/cftoolsAPI";
-import { Ban, ProfileInformation, ProfileState } from "../../models/models";
-import { useAsyncError } from "react-router-dom";
-import { Modal } from "react-bootstrap";
+import React, { useState, useEffect } from 'react';
+import { getProfileStates } from '../../services/cftoolsAPI';
+import { ProfileState } from '../../models/models';
+import { Paper, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Button, CircularProgress, Box, InputBase, IconButton } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import './styles.css';
+import Row from './Row';
+import InputLine from './InputLine'; // Импорт компонента InputLine
 
-const InputLine = (props: { onChange: (identifier: string) => void }) => {
-  const [inputValue, setInputValue] = useState("");
-
-  const handleSearch = () => {
-    props.onChange(inputValue);
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    handleSearch();
-  };
-
-  return (
-    <Box mb={2} mt={2}>
-      <Paper
-        component="form"
-        sx={{ p: "2px 4px", display: "flex", alignItems: "center" }}
-        onSubmit={handleSubmit}
-      >
-        <IconButton type="submit" sx={{ p: "10px" }} aria-label="search">
-          <SearchIcon />
-        </IconButton>
-
-        <InputBase
-          onChange={(e) => setInputValue(e.target.value)}
-          sx={{ ml: 1, flex: 1 }}
-          placeholder="nickname, steamID64, battleyeID"
-        />
-      </Paper>
-    </Box>
-  );
-};
-
-interface RowProps {
-  state: ProfileState;
-}
-const Row = ({ state }: RowProps) => {
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [id, setID] = useState("");
-  const [profileInformation, setProfileInformation] = useState<
-    ProfileInformation | undefined
-  >(undefined);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const data = await getProfileInformation(id);
-      setProfileInformation(data);
-    } catch (error) {
-      console.error("Error fetching profile states:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (open) {
-      fetchData();
-    }
-  }, [open, id]);
-
-  const handleOpenDialog = () => {
-    setOpen(true);
-    setID(state.cftoolsId);
-  };
-
-  const handleCloseDialog = () => {
-    setOpen(false);
-  };
-
-  const renderAvatar = () => {
-    const avatarUrl = profileInformation?.steam?.profile?.avatarfull;
-
-    return (
-      <Avatar
-        alt="Steam Avatar"
-        src={avatarUrl}
-        sx={{ width: 200, height: 200, borderRadius: 1, marginLeft: 2 }}
-      />
-    );
-  };
-
-  const renderNicknames = () => {
-    const nicknames = profileInformation?.overview?.omega?.aliases || [];
-    return <Typography>{nicknames.join(" | ")}</Typography>;
-  };
-
-  return (
-    <React.Fragment>
-      <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
-        <TableCell>
-          <IconButton
-            aria-label="expand row"
-            size="small"
-            onClick={handleOpenDialog}
-          >
-            {loading ? (
-              <CircularProgress size={20} />
-            ) : (
-              <>{open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</>
-            )}
-          </IconButton>
-        </TableCell>
-        <TableCell align="center">{state.identifier}</TableCell>
-        <TableCell align="center">{state.playState.server.name}</TableCell>
-      </TableRow>
-
-      <Dialog
-        open={open}
-        onClose={handleCloseDialog}
-        aria-labelledby="profile-dialog-title"
-      >
-        <DialogTitle id="profile-dialog-title">Profile Information</DialogTitle>
-        <DialogContent>
-          <List>
-            {profileInformation?.overview?.omega?.aliases.map(
-              (nickname: string, index: number) => (
-                <ListItem key={index}>
-                  <ListItemText primary={nickname} />
-                </ListItem>
-              )
-            )}
-          </List>
-          <Typography variant="h6" gutterBottom component="div">
-            Bans
-          </Typography>
-          {profileInformation?.bans ? (
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Ban List</TableCell>
-                    <TableCell>Ban Reason</TableCell>
-                    <TableCell>Ban Date</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {profileInformation.bans.map((ban: Ban, index: number) => (
-                    <TableRow key={index}>
-                      <TableCell>{ban.banList}</TableCell>
-                      <TableCell>{ban.reason}</TableCell>
-                      <TableCell>{ban.issueDate}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          ) : (
-            <Typography>No Bans</Typography>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Close</Button>
-        </DialogActions>
-      </Dialog>
-    </React.Fragment>
-  );
-};
-
-const ProfileTable = () => {
-  const [loading, setLoading] = useState(false);
-  const [identifier, setIdentifier] = useState("");
-  const [states, setStates] = useState<ProfileState[]>([]);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+const ProfileTable: React.FC = () => {
+  const [loading, setLoading] = useState<boolean>(false);
+  const [identifier, setIdentifier] = useState<string>('');
+  const [states, setStates] = useState<ProfileState[] | null>(null);
+  const [page, setPage] = useState<number>(0);
+  const [rowsPerPage, setRowsPerPage] = useState<number>(10);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -212,90 +21,107 @@ const ProfileTable = () => {
         const data = await getProfileStates(identifier);
         setStates(data);
       } catch (error) {
-        console.error("Error fetching profile states:", error);
+        console.error('Error fetching profile states:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    if (identifier) {
+      fetchData();
+    } else {
+      setStates(null);
+    }
   }, [identifier]);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
+  const handleSearch = () => {
+    if (identifier) {
+      fetchData();
+    }
+  };
+
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const data = await getProfileStates(identifier);
+      setStates(data);
+    } catch (error) {
+      console.error('Error fetching profile states:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddToGroup = (state: ProfileState) => {
+    // Implement your add to group functionality here
+    console.log('Adding', state, 'to group');
+  };
+
   return (
-    <Grid container justifyContent="center" alignItems="center" spacing={2}>
-      <Grid item xs={12}>
-        <Grid />
-        <InputLine onChange={(identifier) => setIdentifier(identifier)} />
-
-        <Paper>
-          {loading ? (
-            <Box
-              p={2}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <CircularProgress />
-            </Box>
-          ) : (
-            <>
-              <TableContainer>
-                <Table aria-label="collapsible table">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell />
-                      <TableCell align="center" sx={{ fontSize: "20px" }}>
-                        identifier
-                      </TableCell>
-                      <TableCell align="center" sx={{ fontSize: "20px" }}>
-                        name
-                      </TableCell>
-                      <TableCell align="center" sx={{ fontSize: "20px" }}>
-                        online
-                      </TableCell>
-                      <TableCell align="center" sx={{ fontSize: "20px" }}>
-                        server
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-
-                  <TableBody>
-                    {states
-                      .slice(
-                        page * rowsPerPage,
-                        page * rowsPerPage + rowsPerPage
-                      )
-                      .map((state: ProfileState) => (
-                        <Row key={state.cftoolsId} state={state} />
-                      ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
-                component="div"
-                count={states.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
-            </>
-          )}
-        </Paper>
-      </Grid>
-    </Grid>
+      <Paper elevation={3} className="profile-table">
+        {/* Вот компонент InputLine */}
+        <InputLine onChange={setIdentifier} />
+        <TableContainer>
+          <Table aria-label="profile table">
+            <TableHead>
+              <TableRow>
+                <TableCell />
+                <TableCell>Identifier</TableCell>
+                <TableCell>Name</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Server</TableCell>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      <CircularProgress />
+                    </TableCell>
+                  </TableRow>
+              ) : (
+                  states && states
+                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                      .map((state: ProfileState, index: number) => (
+                          <Row key={index} state={state} handleAddToGroup={handleAddToGroup} />
+                      ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <div className="pagination">
+          <Button
+              variant="contained"
+              onClick={() => handleChangePage(null, page - 1)}
+              disabled={page === 0}
+          >
+            Prev
+          </Button>
+          <Button
+              variant="contained"
+              onClick={() => handleChangePage(null, page + 1)}
+              disabled={page >= Math.ceil((states?.length ?? 0) / rowsPerPage) - 1}
+          >
+            Next
+          </Button>
+        </div>
+      </Paper>
   );
 };
 
