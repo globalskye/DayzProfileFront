@@ -1,11 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { getProfileStates } from '../../services/cftoolsAPI';
 import { ProfileState } from '../../models/models';
-import { Paper, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Button, CircularProgress, Box, InputBase, IconButton } from '@mui/material';
+import {
+  Paper,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Button,
+  CircularProgress,
+  Box,
+  InputBase,
+  IconButton,
+  Grid
+} from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import './styles.css';
 import Row from './Row';
-import InputLine from './InputLine'; // Импорт компонента InputLine
+import InputLine from './InputLine';
+import SidebarPage from "./sidebar"; // Импорт компонента InputLine
 
 const ProfileTable: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -73,54 +88,70 @@ const ProfileTable: React.FC = () => {
   };
 
   return (
-      <Paper elevation={3} className="profile-table">
-        {/* Вот компонент InputLine */}
-        <InputLine onChange={setIdentifier} />
-        <TableContainer>
-          <Table aria-label="profile table">
-            <TableHead>
-              <TableRow>
-                <TableCell />
-                <TableCell>Identifier</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Server</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={6} align="center">
-                      <CircularProgress />
-                    </TableCell>
-                  </TableRow>
-              ) : (
-                  states && states
-                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                      .map((state: ProfileState, index: number) => (
-                          <Row key={index} state={state} handleAddToGroup={handleAddToGroup} />
-                      ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <div className="pagination">
-          <Button
-              variant="contained"
-              onClick={() => handleChangePage(null, page - 1)}
-              disabled={page === 0}
-          >
-            Prev
-          </Button>
-          <Button
-              variant="contained"
-              onClick={() => handleChangePage(null, page + 1)}
-              disabled={page >= Math.ceil((states?.length ?? 0) / rowsPerPage) - 1}
-          >
-            Next
-          </Button>
-        </div>
-      </Paper>
+      <div style={{backgroundColor: 'black', height: '400vh'}}>
+        <Grid
+            container
+            justifyContent="center"
+            height="100%"
+            spacing={2}
+            padding={2}
+        >
+          <Grid item xs={2}>
+            <SidebarPage/>
+          </Grid>
+          <Grid item xs={8}>
+            <Paper elevation={3} className="profile-table">
+              {/* Вот компонент InputLine */}
+              <InputLine onChange={setIdentifier}/>
+              <TableContainer>
+                <Table aria-label="profile table">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell/>
+                      <TableCell>Identifier</TableCell>
+                      <TableCell>Name</TableCell>
+                      <TableCell>Server</TableCell>
+                      <TableCell>Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {loading ? (
+                        <TableRow>
+                          <TableCell colSpan={6} align="center">
+                            <CircularProgress />
+                          </TableCell>
+                        </TableRow>
+                    ) : (
+                        states && states
+                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                            .map((state: ProfileState, index: number) => (
+                                <Row key={index} state={state} handleAddToGroup={handleAddToGroup} />
+                            ))
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <div className="pagination">
+                <Button
+                    variant="contained"
+                    onClick={() => handleChangePage(null, page - 1)}
+                    disabled={page === 0}
+                >
+                  Prev
+                </Button>
+                <Button
+                    variant="contained"
+                    onClick={() => handleChangePage(null, page + 1)}
+                    disabled={page >= Math.ceil((states?.length ?? 0) / rowsPerPage) - 1}
+                >
+                  Next
+                </Button>
+              </div>
+            </Paper>
+          </Grid>
+        </Grid>
+      </div>
+
   );
 };
 

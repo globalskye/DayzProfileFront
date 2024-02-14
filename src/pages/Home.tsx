@@ -16,7 +16,7 @@ const Home = () => {
                     <SidebarPage />
                 </Grid>
                 <Grid item xs={8}>
-                    <ProfileTable />
+
                 </Grid>
             </Grid>
         </div>

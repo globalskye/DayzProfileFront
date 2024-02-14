@@ -71,7 +71,7 @@ export const addGroupProfile = (groupID: string, cftoolsID : string, alias:strin
 };
 export const getGroupProfileInformation = (groupID: string) => {
     return axios
-        .post("http://localhost:8080/group/information/" + groupID , { headers: authHeader() })
+        .get("http://localhost:8080/group/information/" + groupID , { headers: authHeader() })
         .then((response: { data :  ProfileState[]}) => {
             return response.data;
         })

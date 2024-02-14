@@ -1,18 +1,20 @@
 import { createBrowserRouter } from 'react-router-dom';
 import Home from './Home'
+import ProfileTable from "./components/ProfileTable";
+import GroupTable from "./components/Group";
 
 
 const router = createBrowserRouter([
     {
         path: '/',
         element: <Home />,
-        // children: [
-        //     { path: 'login', element: <Login /> },
-        //     { path: 'register', element: <Register /> },
-        //     { path: 'shop-cart', element: <ShopCart /> },
-        //     { path: 'home', element: <Home /> }
-        // ]
+        children: [
+            { path: 'profiles', element: <ProfileTable /> },
+            { path: 'groups', element: <GroupTable /> },
+
+        ]
     },
+
 
 ]);
 
