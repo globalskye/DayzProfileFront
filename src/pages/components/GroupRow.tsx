@@ -29,7 +29,7 @@ interface RowProps {
     handleAddToGroup: (state: ProfileState) => void;
 }
 
-const Row: React.FC<RowProps> = ({ state, handleAddToGroup }) => {
+const GroupRow: React.FC<RowProps> = ({ state, handleAddToGroup }) => {
     const [open, setOpen] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [profileInformation, setProfileInformation] = useState<ProfileInformation | null>(null);
@@ -92,11 +92,11 @@ const Row: React.FC<RowProps> = ({ state, handleAddToGroup }) => {
                         aria-label="expand row"
                         size="small"
                         onClick={
-                        () => {
-                            setOpen(!open);
-                            setFetchInformationGo('go');
+                            () => {
+                                setOpen(!open);
+                                setFetchInformationGo('go');
+                            }
                         }
-                    }
                     >
                         {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                     </IconButton>
@@ -195,4 +195,4 @@ const Row: React.FC<RowProps> = ({ state, handleAddToGroup }) => {
     );
 };
 
-export default Row;
+export default GroupRow;

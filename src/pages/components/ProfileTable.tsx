@@ -83,7 +83,6 @@ const ProfileTable: React.FC = () => {
                 <TableCell />
                 <TableCell>Identifier</TableCell>
                 <TableCell>Name</TableCell>
-                <TableCell>Status</TableCell>
                 <TableCell>Server</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>

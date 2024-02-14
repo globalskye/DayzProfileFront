@@ -10,7 +10,7 @@ import GroupIcon from '@mui/icons-material/Group';
 import { getGroups,createGroup } from '../../services/cftoolsAPI';
 import {Group} from '../../models/models';
 import {Button, CircularProgress, Collapse, TextField} from '@mui/material';
-
+import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 const SidebarPage = () => {
 
 
@@ -28,7 +28,18 @@ const SidebarPage = () => {
                 padding: '16px'
             }}
         >
-        <GroupItem />
+            <List>
+                <ListItem disablePadding>
+                <ListItemButton >
+                    <ListItemIcon>
+                    <PersonSearchIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={"Search profiles"} />
+                </ListItemButton>
+            </ListItem>
+            </List>
+            <Divider />
+            <GroupItem />
             <ContactMe />
         </Box>
     );
@@ -103,7 +114,7 @@ const GroupItem = () => {
         };
 
         fetchData();
-    }, []);
+    }, [open]);
 
     const handleNewGroup = async () => {
         try {

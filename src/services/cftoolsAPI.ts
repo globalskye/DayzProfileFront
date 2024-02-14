@@ -60,8 +60,19 @@ export const deleteGroupProfile = (groupID: string, cftoolsID : string) => {
 };
 export const addGroupProfile = (groupID: string, cftoolsID : string, alias:string) => {
     return axios
-        .post("http://localhost:8080/group/" + groupID +"/"+cftoolsID+"/"+alias, { headers: authHeader() })
+        .post("http://localhost:8080/group/add/" + groupID +"/"+cftoolsID+"/"+alias, { headers: authHeader() })
         .then((response: { data :  Group}) => {
+            return response.data;
+        })
+        .catch((error: any) => {
+            console.error("Error fetching profile information:", error);
+            throw error;
+        });
+};
+export const getGroupProfileInformation = (groupID: string) => {
+    return axios
+        .post("http://localhost:8080/group/information/" + groupID , { headers: authHeader() })
+        .then((response: { data :  ProfileState[]}) => {
             return response.data;
         })
         .catch((error: any) => {
