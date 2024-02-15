@@ -1,5 +1,5 @@
 export const authHeader = () => {
-    const secretKey = localStorage.getItem("secretKey");
+    const secretKey = localStorage.getItem("authorization");
   
     if (secretKey) {
       return {

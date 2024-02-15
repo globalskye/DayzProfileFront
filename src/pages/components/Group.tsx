@@ -117,21 +117,19 @@ const GroupTable: React.FC = () => {
                     <Paper elevation={3} className="profile-table">
                         <Grid container spacing={2}>
                             <Grid item xs={6}>
-                                <Select
-                                    value={groupID}
-                                    onChange={(e) => {
-                                        setGroupID(e.target.value as string)
-                                        console.log(e.target.value as string)
-                                    }}
-                                    fullWidth
-                                >
+                                <List component="nav" aria-label="group list">
                                     {groups &&
                                         groups.map((group) => (
-                                            <MenuItem key={group.id} value={group.id}>
-                                                {group.groupName}
-                                            </MenuItem>
+                                            <><ListItemButton
+                                                key={group.id}
+                                                onClick={() => setGroupID(String(group.id))}
+                                            >
+                                                <ListItemText primary={group.groupName} />
+                                            </ListItemButton>
+                                                <Divider /></>
+
                                         ))}
-                                </Select>
+                                </List>
                             </Grid>
                             <Grid item xs={4}>
                                 <TextField
@@ -264,7 +262,7 @@ const GroupRow: React.FC<GroupRowProps> = ({ state, groupId }) => {
                 <TableCell>{state.playState.server.name ? state.playState.server.name : 'Offline'}</TableCell>
                 <TableCell>
                     <Button
-
+                        onClick={()=>handleDeleteFromGroupClick()}
                         disabled={loading}
                         variant={'outlined'}
                     >
