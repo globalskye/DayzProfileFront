@@ -83,7 +83,28 @@ const Row: React.FC<RowProps> = ({ state, handleAddToGroup }) => {
             // Обработка ошибок, если не удалось добавить профиль в группу
         }
     };
+    const formatLastPlaytime = (isoString: string ) => {
+        const date = new Date(isoString);
+        date.setHours(date.getHours() + 3);
 
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    };
+    const [isOpen1, setIsOpen] = useState(false);
+
+    const toggleList = () => {
+        setIsOpen(!isOpen1);
+    };
+    // @ts-ignore
+    const lastPlaytimeISO = profileInformation?.overview.omega.updated_at;
+    // @ts-ignore
+    const formattedLastPlaytime = formatLastPlaytime(lastPlaytimeISO);
     return (
         <>
             <TableRow>
@@ -121,21 +142,57 @@ const Row: React.FC<RowProps> = ({ state, handleAddToGroup }) => {
                             <CircularProgress />
                         ) : (
                             <>
-                                <Avatar alt="Steam Avatar" src={profileInformation?.steam?.profile?.avatarfull} />
+                                <Avatar alt="Steam Avatar" src={profileInformation?.steam?.profile?.avatarfull}/>
+
                                 <Typography variant="h6" gutterBottom component="div">
-                                    <Link href={'https://steamcommunity.com/profiles/'+profileInformation?.steam.steam64} target="_blank">
+                                    <Link
+                                        href={'https://steamcommunity.com/profiles/' + profileInformation?.steam.steam64}
+                                        target="_blank">
                                         {profileInformation?.steam?.profile?.personaname}'s Steam Profile
                                     </Link>
                                 </Typography>
+                                <Typography variant="h6" gutterBottom component="div">
+                                    <Link href={'https://app.cftools.cloud/profile/' + state.cftoolsId} target="_blank">
+                                        {profileInformation?.steam?.profile?.personaname}'s CFTools Profile
+                                    </Link>
+                                </Typography>
+                                <ListItem>
+                                    <ListItemText primary={'STEAMID : ' + profileInformation?.steam.profile.steamid}/>
+                                    <ListItemText primary={'LAST PLAYTIME : ' + formattedLastPlaytime}/>
+                                </ListItem>
                                 <Typography variant="h6" gutterBottom component="div">
                                     Nicknames:
                                 </Typography>
                                 <Typography variant="body1" gutterBottom component="div">
                                     {profileInformation?.overview?.omega?.aliases?.join(' | ') || 'No nicknames available'}
                                 </Typography>
-                                <ListItem >
-                                    <ListItemText primary={'VAC : ' +  profileInformation?.steam.bans.NumberOfVACBans}  />
-                                    <ListItemText primary={'EAC : ' + profileInformation?.steam.bans.NumberOfGameBans}  />
+                                <Typography variant="h6" gutterBottom component="div">
+                                    Alternate accounts:
+                                </Typography>
+                                <div>
+                                    <Button onClick={toggleList}>{isOpen1 ? 'Close List' : 'Open List'}</Button>
+                                    {isOpen1 && (
+                                        <Typography variant="body1" gutterBottom component="div">
+                                            <List>
+                                                {profileInformation?.overview.alternate_accounts.links.map((a: any) => (
+                                                    <ListItem key={a.cftools_id}>
+                                                        <Link href={'https://app.cftools.cloud/profile/' + a.cftools_id}
+                                                              target="_blank">
+                                                            {a.cftools_id}
+                                                        </Link>
+                                                        <ListItemText />
+                                                        <ListItemText primary={'Confirmed: ' + a.confirmed}/>
+                                                        <ListItemText primary={'Trusted: ' + a.trusted}/>
+                                                    </ListItem>
+                                                ))}
+                                            </List>
+                                        </Typography>
+                                    )}
+                                </div>
+
+                                <ListItem>
+                                    <ListItemText primary={'VAC : ' + profileInformation?.steam.bans.NumberOfVACBans}/>
+                                    <ListItemText primary={'EAC : ' + profileInformation?.steam.bans.NumberOfGameBans}/>
                                 </ListItem>
                                 <Typography variant="h6" gutterBottom component="div">
                                     Bans:
@@ -143,18 +200,22 @@ const Row: React.FC<RowProps> = ({ state, handleAddToGroup }) => {
                                 <List>
                                     {profileInformation?.bans?.map((ban: Ban, index: number) => (
                                         <ListItem key={index}>
-                                            <ListItemText primary={`${ban.banList} - ${ban.reason}`} secondary={`Issued on: ${ban.issueDate}`} />
+                                            <ListItemText primary={`${ban.banList} - ${ban.reason}`}
+                                                          secondary={`Issued on: ${ban.issueDate}`}/>
                                         </ListItem>
                                     ))}
                                 </List>
                                 <List>
                                     {profileInformation?.banStatus.records?.map((ban: any, index: number) => (
                                         <ListItem key={index}>
-                                            <ListItemText primary={` Battleye  - ${ban.id}`} secondary={`Issued on: ${ban.date}`} />
+                                            <ListItemText primary={` Battleye  - ${ban.id}`}
+                                                          secondary={`Issued on: ${ban.date}`}/>
                                         </ListItem>
                                     ))}
                                 </List>
                             </>
+
+
                         )}
                     </Collapse>
                 </TableCell>

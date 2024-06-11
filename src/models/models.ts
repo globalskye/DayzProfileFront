@@ -2,6 +2,8 @@ export interface ProfileState {
     cftoolsId: string;
     identifier: string;
     displayName: string;
+  possibleLastNickname :string;
+  updatedAt: string;
     playState: {
       online: boolean;
       server: {
@@ -17,7 +19,21 @@ export interface ProfileState {
     status: boolean;
   }
 
+interface AlternateAccountLink {
+  cftools_id: string;
+  confirmed: boolean;
+  trusted: boolean;
+  watchProfileActive: boolean;
+}
+
+interface AlternateAccounts {
+  links: AlternateAccountLink[];
+  show_warning: boolean;
+  total_count: number;
+}
+
   export interface Overview {
+    alternate_accounts : AlternateAccounts
     omega: {
       aliases: string[];
       created_at: string;
@@ -69,6 +85,8 @@ export interface ProfileState {
 export interface Member {
   CFToolsID: string;
   alias: string;
+  possibleLastNickname: string;
+  updatedAt :string;
 }
 
 export interface Group {
